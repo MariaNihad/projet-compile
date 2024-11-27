@@ -39,15 +39,8 @@
 .                             { printf("Caractère non reconnu : %s\n", yytext); }
 %%
 
-int main(int argc, char **argv) {
-    if (argc > 1) {
-        FILE *file = fopen(argv[1], "r");
-        if (!file) {
-            perror("Impossible d'ouvrir le fichier");
-            return 1;
-        }
-        yyin = file;
-    }
+int main() {
+   
     yylex();
     return 0;
 }
