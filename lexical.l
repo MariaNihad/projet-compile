@@ -1,47 +1,65 @@
 %{
+#include "y.tab.h"
 #include <stdio.h>
-#include <stdlib.h>
+
+int num_lignes = 1;  // Variable pour compter les lignes
 %}
 
 %%
-"DEBUT"                       { printf("Mot clé DEBUT\n"); }
-"FIN"                         { printf("Mot clé FIN\n"); }
-"EXECUTION"                   { printf("Mot clé EXECUTION\n"); }
-"TANTQUE"                     { printf("Mot clé TANTQUE\n"); }
-"SI"                          { printf("Mot clé SI\n"); }
-"ALORS"                       { printf("Mot clé ALORS\n"); }
-"SINON"                       { printf("Mot clé SINON\n"); }
-"FAIRE"                       { printf("Mot clé FAIRE\n"); }
-"NUM"                         { printf("Type NUM\n"); }
-"REAL"                        { printf("Type REAL\n"); }
-"TEXT"                        { printf("Type TEXT\n"); }
-"FIXE"                        { printf("Mot clé FIXE\n"); }
-"<-"                          { printf("Opérateur d'affectation\n"); }
-[0-9]+                        { printf("Nombre entier : %s\n", yytext); }
-[0-9]+\.[0-9]+                { printf("Nombre réel : %s\n", yytext); }
-\"[^\"]*\"                    { printf("Chaîne de caractères : %s\n", yytext); }
-[A-Z_][A-Z0-9_]{0,9}          { printf("Identificateur : %s\n", yytext); }
-"--"[^#]*"##"                { printf("Commentaire ligne : %s\n", yytext); }
-"{-"[^-]*"-}"                { printf("Commentaire multi-lignes : %s\n", yytext); }
-"affiche"                     { printf("Mot clé affiche\n"); }
-"lire"                        { printf("Mot clé lire\n"); }
-"+"                           { printf("Opérateur addition\n"); }
-"-"                           { printf("Opérateur soustraction\n"); }
-"*"                           { printf("Opérateur multiplication\n"); }
-"/"                           { printf("Opérateur division\n"); }
-"=="                          { printf("Opérateur égalité\n"); }
-"!="                          { printf("Opérateur inégalité\n"); }
-">"                           { printf("Opérateur supérieur\n"); }
-">="                          { printf("Opérateur supérieur ou égal\n"); }
-"<"                           { printf("Opérateur inférieur\n"); }
-"<="                          { printf("Opérateur inférieur ou égal\n"); }
-[ \t\n]+                      { /* Ignorer les espaces, tabulations et nouvelles lignes */ }
-.                             { printf("Caractère non reconnu : %s\n", yytext); }
+
+"DEBUT"         return mc_DEBUT;
+"FIN"           return mc_FIN;
+"EXECUTION"     return mc_EXECUTION;
+"NUM"           return mc_NUM;
+"REAL"          return mc_REAL;
+"TEXT"          return mc_TEXT;
+"FIXE"          return mc_FIXE;
+"SI"            return mc_SI;
+"ALORS"         return mc_ALORS;
+"SINON"         return mc_SINON;
+"TANTQUE"       return mc_TANTQUE;
+"FAIRE"         return mc_FAIRE;
+"lire"          return mc_LIRE;
+"affiche"       return mc_AFFICHE;
+
+[0-9]+          return CST_NUM;
+[0-9]+\.[0-9]+  return CST_REAL;
+\"[^\"]*\"      return CST_TEXT;
+
+[A-Z][a-zA-Z0-9_]{0,9} return IDF;  // Identificateur
+
+
+"--"[^#]*"##"                 { printf("Commentaire ligne : %s\n", yytext); }
+"{-"[^-]*"-}"                 { printf("Commentaire multi-lignes : %s\n", yytext); }
+
+"+"             return PLUS;
+"-"             return MOINS;
+"*"             return FOIS;
+"/"             return DIV;
+
+"<="            return INF_EGAL;
+">="            return SUP_EGAL;
+"="             return EGAL;
+"!="            return DIFF;
+
+"{"             return OUVRE_ACCOLADE;
+"}"             return FERME_ACCOLADE;
+";"             return POINT_VIRGULE;
+
+[ \t]+          /* Ignorer les espaces et tabulations */
+
+\n              { num_lignes++; }  // Incrémente le numéro de ligne chaque fois qu'une nouvelle ligne est rencontrée
+
+.               {
+                   printf("Erreur lexicale : caractère non reconnu '%s'\n", yytext);
+                   return -1; // Retourne un code d'erreur pour caractères non reconnus
+                }
+
 %%
 
 int main() {
-   
-    yylex();
+    yylex();  // Appel au lexer pour traiter le code source
+    printf("Nombre total de lignes : %d\n", num_lignes);  // Affiche le nombre total de lignes lues
     return 0;
 }
 
